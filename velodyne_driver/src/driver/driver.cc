@@ -37,6 +37,7 @@
 
 #include <string>
 #include <cmath>
+#include <chrono>
 
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
@@ -60,7 +61,7 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   private_nh.param("model", config_.model, std::string("64E"));
   double packet_rate;                   // packet frequency (Hz)
   std::string model_full_name;
-  if ((config_.model == "64E_S2") || 
+  if ((config_.model == "64E_S2") ||
       (config_.model == "64E_S2.1"))    // generates 1333312 points per second
     {                                   // 1 packet holds 384 points
       packet_rate = 3472.17;            // 1333312 / 384
@@ -119,7 +120,7 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
   }
   else if (cut_angle < (2*M_PI))
   {
-      ROS_INFO_STREAM("Cut at specific angle feature activated. " 
+      ROS_INFO_STREAM("Cut at specific angle feature activated. "
         "Cutting velodyne points always at " << cut_angle << " rad.");
   }
   else
@@ -129,7 +130,7 @@ VelodyneDriver::VelodyneDriver(ros::NodeHandle node,
     cut_angle = -0.01;
   }
 
-  // Convert cut_angle from radian to one-hundredth degree, 
+  // Convert cut_angle from radian to one-hundredth degree,
   // which is used in velodyne packets
   config_.cut_angle = int((cut_angle*360/(2*M_PI))*100);
 
@@ -241,6 +242,11 @@ bool VelodyneDriver::poll(void)
         {
           // keep reading until full packet received
           int rc = input_->getPacket(&scan->packets[i], config_.time_offset);
+
+          auto ts = std::chrono::system_clock::now();
+          ROS_DEBUG_NAMED("velodyne", "[raw_packet]: %lu us",
+            std::chrono::time_point_cast<std::chrono::microseconds>(ts).time_since_epoch().count());
+
           if (rc == 0) break;       // got a full packet?
           if (rc < 0) return false; // end of file reached?
         }

@@ -18,6 +18,8 @@
 #include <velodyne_pointcloud/pointcloudXYZIR.h>
 #include <velodyne_pointcloud/organized_cloudXYZIR.h>
 
+#include <chrono>
+
 namespace velodyne_pointcloud
 {
   /** @brief Constructor. */
@@ -137,7 +139,13 @@ namespace velodyne_pointcloud
     // publish the accumulated cloud message
     diag_topic_->tick(scanMsg->header.stamp);
     diagnostics_.update();
-    output_.publish(container_ptr_->finishCloud());
+    const auto& cloud = container_ptr_->finishCloud();
+
+    auto ts = std::chrono::system_clock::now();
+    ROS_DEBUG_NAMED("velodyne", "[velodyne_points]: %lu us",
+      std::chrono::time_point_cast<std::chrono::microseconds>(ts).time_since_epoch().count());
+
+    output_.publish(cloud);
   }
 
 } // namespace velodyne_pointcloud
