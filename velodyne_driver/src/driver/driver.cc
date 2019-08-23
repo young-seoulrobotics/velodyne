@@ -244,7 +244,7 @@ bool VelodyneDriver::poll(void)
           int rc = input_->getPacket(&scan->packets[i], config_.time_offset);
 
           auto ts = std::chrono::system_clock::now();
-          ROS_DEBUG_NAMED("velodyne", "[raw_packet]: %lu us",
+          ROS_INFO_NAMED("velodyne", "[raw_packet]: %lu us",
             std::chrono::time_point_cast<std::chrono::microseconds>(ts).time_since_epoch().count());
 
           if (rc == 0) break;       // got a full packet?
