@@ -142,7 +142,7 @@ namespace velodyne_pointcloud
     const auto& cloud = container_ptr_->finishCloud();
 
     auto ts = std::chrono::system_clock::now();
-    ROS_INFO_NAMED("velodyne", "[velodyne_points]: %lu us",
+    ROS_INFO("[before publishing velodyne_points]: %lu us",
       std::chrono::time_point_cast<std::chrono::microseconds>(ts).time_since_epoch().count());
 
     output_.publish(cloud);

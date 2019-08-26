@@ -243,10 +243,6 @@ bool VelodyneDriver::poll(void)
           // keep reading until full packet received
           int rc = input_->getPacket(&scan->packets[i], config_.time_offset);
 
-          auto ts = std::chrono::system_clock::now();
-          ROS_INFO_NAMED("velodyne", "[raw_packet]: %lu us",
-            std::chrono::time_point_cast<std::chrono::microseconds>(ts).time_since_epoch().count());
-
           if (rc == 0) break;       // got a full packet?
           if (rc < 0) return false; // end of file reached?
         }
@@ -257,6 +253,11 @@ bool VelodyneDriver::poll(void)
   ROS_DEBUG("Publishing a full Velodyne scan.");
   scan->header.stamp = scan->packets.back().stamp;
   scan->header.frame_id = config_.frame_id;
+
+  auto ts = std::chrono::system_clock::now();
+  ROS_INFO("[before converting into velodyne_points]: %lu us",
+    std::chrono::time_point_cast<std::chrono::microseconds>(ts).time_since_epoch().count());
+
   output_.publish(scan);
 
   // notify diagnostics that a message has been published, updating
